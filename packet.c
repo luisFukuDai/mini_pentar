@@ -80,12 +80,13 @@ void decodePacket()
   r1S[0] = (packet[7]&0b00001000)/8;
   r1S[1] = (packet[7]&0b00010000)/16;
 
+  /*
+     sprintf(sprintfBuff,"%d %d %d %d\n",r0M[0],r0M[1],r0S[0],r0S[1]);
+     sci0Puts(sprintfBuff);
 
-  sprintf(sprintfBuff,"%d %d %d %d\n",r0M[0],r0M[1],r0S[0],r0S[1]);
-  sci0Puts(sprintfBuff);
-
-  sprintf(sprintfBuff,"%d %d %d %d\n",r1M[0],r1M[1],r1S[0],r1S[1]);
-  sci0Puts(sprintfBuff);
+     sprintf(sprintfBuff,"%d %d %d %d\n",r1M[0],r1M[1],r1S[0],r1S[1]);
+     sci0Puts(sprintfBuff);
+     */
 
 }  
 
@@ -95,9 +96,11 @@ int checkPacket(void)
   if (formPacket() == 1){
     newData = 1;
     decodePacket();
-    sci0Puts("decoded");
-    sci0Putc(newData+0x30);
-    sci0Puts("\n");
+    /*
+       sci0Puts("decoded");
+       sci0Putc(newData+0x30);
+       sci0Puts("\n");
+       */
 
 #ifdef ROBOT0
     servoData[0] = r0S[0] != 0 ? 1500:-1500;
