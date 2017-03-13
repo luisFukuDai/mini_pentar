@@ -405,7 +405,7 @@ void  INT_Excep_POE_OEI4(void){ }
 void  INT_Excep_TMR0_CMIA0(void)/*MAIN TIMER INTERRUPT*/
 {
 
-//  static int i;
+  static int i;
 
   setAdVal(); 
   encBuff();
@@ -416,18 +416,14 @@ void  INT_Excep_TMR0_CMIA0(void)/*MAIN TIMER INTERRUPT*/
   gyroCalcDQ(&CRS02);
   accelCalcAngle(&SCAT100);
 
-  /*
   setInvVars(); 
 
   if(i < 20000)
     i++;
   else
     balance();
-*/
 
-
-
-  wheelControl();
+//  wheelControl();
 
 #ifdef ROBOT0
   if(newData){

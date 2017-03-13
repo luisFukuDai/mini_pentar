@@ -64,7 +64,7 @@ int main(void)
   //  setDuty(servoL,0.047);
   //  setDuty(servoS,0.078);
 
-  
+
   while(1){
 
     checkPacket();
@@ -80,16 +80,14 @@ int main(void)
           \t%ld \
           \t%ld \
           \t%ld \
-          \t%ld \
           \n",
           (long) (1000*ti), 
-          (long) (1000*wheelMotor[0].q),
-          (long) (1000*wheelMotor[0].dQD),
-          (long) (1000*eso[0].xHat[1]),
-          (long) (1000*wheelMotor[1].q),
-          (long) (1000*wheelMotor[1].dQD),
-          (long) (1000*eso[1].xHat[1])
-         );
+          (long) (R0.psi.q*1000), 
+          (long) (R0.psi.dQ*1000), 
+          (long) (R0.thetaW.q*1000), 
+          (long) (R0.thetaW.dQ*1000), 
+          (long) (R0.phi.q*1000) 
+          );
 
       sci0Puts(sprintfBuff);
 
@@ -98,7 +96,7 @@ int main(void)
         PORTA.DR.BIT.B0 = ~PORTA.DR.BIT.B0;
 
     }
-    
+
 
   }
 

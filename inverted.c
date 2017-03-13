@@ -274,11 +274,11 @@ void balance()
   u = u/2.0;
 
   doubleMotorTorque0(u-uSteer);
-  setMotorPwmValue(0,wheelMotor[0].pwmVal);
-  setMotorPwmValue(2,wheelMotor[2].pwmVal);
+//  setMotorPwmValue(0,wheelMotor[0].pwmVal);
+//  setMotorPwmValue(2,wheelMotor[2].pwmVal);
 
   doubleMotorTorque1(u+uSteer);
-  setMotorPwmValue(1,wheelMotor[1].pwmVal);
-  setMotorPwmValue(3,wheelMotor[3].pwmVal);
+//  setMotorPwmValue(1,wheelMotor[1].pwmVal);
+//  setMotorPwmValue(3,wheelMotor[3].pwmVal);
 
 }
