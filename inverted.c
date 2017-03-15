@@ -35,7 +35,7 @@ float adaptFilter(float x)
 
   static float xHat;
   static float dXHat;
-  static float w0 = 30.0;
+  static float w0 = 20.0;
   static int first;
 
   static float dqHat;
@@ -54,10 +54,10 @@ float adaptFilter(float x)
   dXHat = dXHat + dt*( w0*w0*e); 
 
 
-  alpha = fabs(dXHat*2.0) + 0.000;
+  alpha = fabs(dXHat*1.0) + 0.01;
 
-  if(alpha >= 1.0)
-    alpha = 1.0;
+  if(alpha >= 0.9)
+    alpha = 0.9;
 
   dqHat = (1-alpha)*dqHat + alpha*x;
 
@@ -138,7 +138,8 @@ float adaptFilterTheta(float x)
 void kalman()
 {
   float K1 = 0.001;
-  float K2 = 0.00001;
+  //float K2 = 0.00001;
+  float K2 = 0.0005;
 
   float e;
 
@@ -152,8 +153,10 @@ void kalman()
   else{
     qHat = qHat + 0.001*(dHat + adaptDq); 
     e = qHat - SCAT100.qF; 
-    qHat = qHat - (K1/(1 + fabs(adaptDq*30.0)))*e;
-    dHat = dHat - (K2/(1 + fabs(adaptDq/1.0)))*e;
+//    qHat = qHat - (K1/(1 + fabs(adaptDq*30.0)))*e;
+    qHat = qHat - (K1/(1 + fabs(adaptDq*3.0)))*e;
+    dHat = dHat - (K2/(1 + fabs(adaptDq*2.0)))*e;
+//    dHat = dHat - K2*e;
   }
 }
 
@@ -201,7 +204,7 @@ void initInvVars()
   Z.tau = 0.;
 
 
-  esoPsi.b = -30.0;
+  esoPsi.b = -90.0;
   esoPsi.l[0] = w0*3.0;
   esoPsi.l[1] = w0*w0*3.0;
   esoPsi.l[2] = w0*w0*w0;
@@ -223,8 +226,6 @@ void esoInvCalc()
     esoPsi.xHat[1] = 0;
     esoPsi.xHat[2] = 0;
     esoPsi.u = 0;
-
-
   }
 
 
@@ -245,6 +246,7 @@ void balance()
 {
 
   float u;
+  float tau;
   float uSteer;
 
   static int first;
@@ -264,7 +266,9 @@ void balance()
     setInvVars();
   }
 
-  R0.thetaW.dQ = adaptDqTheta = adaptFilterTheta(R0.thetaW.q);
+  R0.thetaW.dQ = adaptDqTheta = adaptFilterTheta(R0.thetaW.q);//*0.75;
+  //R0.thetaW.dQ += (0.25*(0.5*(wheelMotor[0].dQ + wheelMotor[1].dQ) + R0.psi.dQ));
+
   esoInvCalc();
 
   R0.psi.u = u = (R0.psi.q- -0.0)*10.0 + R0.psi.dQ*1.2 + R0.thetaW.q*0.08 + R0.thetaW.dQ*0.08 - esoPsi.xHat[2]/esoPsi.b;
@@ -273,12 +277,13 @@ void balance()
   uSteer = -R0.phi.q*0.1 - adaptFilterPhi(R0.phi.q)*0.08;
   u = u/2.0;
 
-  doubleMotorTorque0(u-uSteer);
+  tau = doubleMotorTorque0(u-uSteer);
 //  setMotorPwmValue(0,wheelMotor[0].pwmVal);
 //  setMotorPwmValue(2,wheelMotor[2].pwmVal);
 
-  doubleMotorTorque1(u+uSteer);
+  tau += doubleMotorTorque1(u+uSteer);
 //  setMotorPwmValue(1,wheelMotor[1].pwmVal);
 //  setMotorPwmValue(3,wheelMotor[3].pwmVal);
 
+  R0.psi.u = tau;
 }

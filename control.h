@@ -53,8 +53,8 @@ void setMotorPwmValue(short n, float pwmVal);
 float motorTorque0(float tau);
 float motorTorque1(float tau);
 
-void doubleMotorTorque0(float tau);
-void doubleMotorTorque1(float tau);
+float doubleMotorTorque0(float tau);
+float doubleMotorTorque1(float tau);
 
 void wheelControl();
 

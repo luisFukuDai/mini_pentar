@@ -40,7 +40,7 @@ float adaptFilterMotor1(float x)
 
   static float xHat;
   static float dXHat;
-  static float w0 = 15.0;
+  static float w0 = 20.0;
   static int first;
 
   static float dqHat;
@@ -59,10 +59,10 @@ float adaptFilterMotor1(float x)
   dXHat = dXHat + dt*( w0*w0*e); 
 
 
-  alpha = fabs(dXHat*2.0) + 0.5;
+  alpha = fabs(dXHat*0.5) + 0.01;
 
-  if(alpha >= 0.99)
-    alpha = 0.99;
+  if(alpha >= 0.9)
+    alpha = 0.9;
 
   dqHat = (1-alpha)*dqHat + alpha*x;
 
@@ -75,7 +75,7 @@ float adaptFilterMotor2(float x)
 
   static float xHat;
   static float dXHat;
-  static float w0 = 15.0;
+  static float w0 = 20.0;
   static int first;
 
   static float dqHat;
@@ -94,10 +94,10 @@ float adaptFilterMotor2(float x)
   dXHat = dXHat + dt*( w0*w0*e); 
 
 
-  alpha = fabs(dXHat*2.0) + 0.5;
+  alpha = fabs(dXHat*0.5) + 0.01;
 
-  if(alpha >= 0.99)
-    alpha = 0.99;
+  if(alpha >= 0.9)
+    alpha = 0.9;
 
   dqHat = (1-alpha)*dqHat + alpha*x;
 
@@ -106,11 +106,11 @@ float adaptFilterMotor2(float x)
 }
 
 
-void doubleMotorTorque0(float tau)
+float doubleMotorTorque0(float tau)
 {
   float voltage;
   float voltageA,voltageB;
-  float alpha = 1.0;//volts
+  float alpha = 2.0;//volts
   float velocity;
 
   tau /= (14.0*28.0/20.0);
@@ -138,13 +138,21 @@ void doubleMotorTorque0(float tau)
   wheelMotor[0].pwmVal = voltageA/14.0;
   wheelMotor[2].pwmVal = voltageB/14.0;
 
+
+  if( voltage > 12.0 )
+    voltage = 12.0;
+  else if( voltage < -12.0 )
+    voltage = -12.0;
+
+  return ((voltage - 10.9e-3*velocity*(14.0*28.0/20.0)/2)*10.9e-3/5.53*2.0)/20.0*28.0*14.0;
+
 }
 
-void doubleMotorTorque1(float tau)
+float doubleMotorTorque1(float tau)
 {
   float voltage;
   float voltageA,voltageB;
-  float alpha = 1.5;//volts
+  float alpha = 2.0;//volts
   float velocity;
 
   tau /= (14.0*28.0/20.0);
@@ -172,6 +180,12 @@ void doubleMotorTorque1(float tau)
   wheelMotor[1].pwmVal = voltageA/14.0;
   wheelMotor[3].pwmVal = voltageB/14.0;
 
+  if( voltage > 12.0 )
+    voltage = 12.0;
+  else if( voltage < -12.0 )
+    voltage = -12.0;
+
+  return ((voltage - 10.9e-3*velocity*(14.0*28.0/20.0)/2)*10.9e-3/5.53*2.0)/20.0*28.0*14.0;
 
 }
 

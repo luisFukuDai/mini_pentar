@@ -80,9 +80,11 @@ int main(void)
           \t%ld \
           \t%ld \
           \t%ld \
+          \t%ld \
           \n",
           (long) (1000*ti), 
           (long) (R0.psi.q*1000), 
+          (long) (SCAT100.qF*1000),
           (long) (R0.psi.dQ*1000), 
           (long) (R0.thetaW.q*1000), 
           (long) (R0.thetaW.dQ*1000), 
