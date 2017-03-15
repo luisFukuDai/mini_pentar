@@ -27,7 +27,7 @@ SOURCES = reset_program.S $(wildcard *.c)
 OBJECTS = $(SOURCES:.c=.o) 
 
 rx621.mot : rx621.out
-	$(PREFIX)-objcopy -O srec rx621.out $@;cp rx621.mot ~/winshare
+	$(PREFIX)-objcopy -O srec rx621.out $@;cp rx621.mot ~/Dropbox
 
 # Define ROMSTART if compiling for ROM
 rx621.out:$(SOURCES) rx621.ld makefile
