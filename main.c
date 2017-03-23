@@ -36,6 +36,11 @@ extern float adaptDqTheta;
 
 extern float ti;
 
+float getPsiDq();
+float getThetaDq();
+
+
+
 int main(void)
 {
   int i=0;
@@ -81,15 +86,18 @@ int main(void)
           \t%ld \
           \t%ld \
           \t%ld \
+          \t%ld \
           \n",
           (long) (1000*ti), 
           (long) (R0.psi.q*1000), 
-          (long) (SCAT100.qF*1000),
           (long) (R0.psi.dQ*1000), 
+          (long) (getPsiDq()*1000),//R0.psi.dQ*1000), 
           (long) (R0.thetaW.q*1000), 
           (long) (R0.thetaW.dQ*1000), 
-          (long) (R0.phi.q*1000) 
+          (long) (getThetaDq()*1000), 
+          (long) (getEsoThetaTau()*1000)
           );
+          //(long) (R0.phi.q*1000), 
 
       sci0Puts(sprintfBuff);
 

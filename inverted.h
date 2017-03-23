@@ -30,6 +30,7 @@ typedef struct inv_pen{
 void setInvVars();
 void initInvVars();
 void balance();
+float getEsoThetaTau();
 
 #endif
 

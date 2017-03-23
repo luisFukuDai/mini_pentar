@@ -24,11 +24,21 @@ static INV_PEN Z;
 
 static float qHat;
 static float dHat;
+
 static ESO esoPsi;
+static ESO esoPsiSlow;
+static ESO esoTheta;
+
+static float uPsi;
+static float uTheta;
+
 float adaptDq;
 float adaptDqTheta;
 
 float getQHat(){return qHat;};
+float getEsoThetaTau(){return esoTheta.xHat[2];};
+float getPsiDq(){return R0.psi.dQ;};
+float getThetaDq(){return R0.thetaW.dQ;};
 
 float adaptFilter(float x)
 {
@@ -180,6 +190,8 @@ void setInvVars()
 void initInvVars()
 {
   float w0 = 40;
+  float w0Slow = 1.0;
+  float w0Theta = 50;
 
   R0.psi.dQ = 0.0;
   R0.psi.q  = 0.0;
@@ -209,7 +221,15 @@ void initInvVars()
   esoPsi.l[1] = w0*w0*3.0;
   esoPsi.l[2] = w0*w0*w0;
 
+  esoPsiSlow.b = -1.0;
+  esoPsiSlow.l[0] = w0Slow*3.0;
+  esoPsiSlow.l[1] = w0Slow*w0Slow*3.0;
+  esoPsiSlow.l[2] = w0Slow*w0Slow*w0Slow;
 
+  esoTheta.b = 120.0;
+  esoTheta.l[0] = w0Theta*3.0;
+  esoTheta.l[1] = w0Theta*w0Theta*3.0;
+  esoTheta.l[2] = w0Theta*w0Theta*w0Theta;
 
 } 
 
@@ -242,6 +262,67 @@ void esoInvCalc()
 
 }
 
+void esoPsiCalc()
+{
+  float e;
+
+  esoPsiSlow.x = R0.psi.q;
+  esoPsiSlow.u = uPsi;
+
+  if(esoPsiSlow.first == 0){
+    esoPsiSlow.first = 1;
+    esoPsiSlow.xHat[0] = esoPsi.x;
+    esoPsiSlow.xHat[1] = 0;
+    esoPsiSlow.xHat[2] = 0;
+    esoPsiSlow.u = 0;
+  }
+
+
+  e = esoPsiSlow.x - esoPsiSlow.xHat[0];
+
+  if (e > 1)
+    e = 1;
+  else if ( e < -1)
+    e = -1;
+
+  esoPsiSlow.xHat[0] =  esoPsiSlow.xHat[0] + dt*(esoPsiSlow.xHat[1] + esoPsiSlow.l[0]*e);
+  esoPsiSlow.xHat[1] =  esoPsiSlow.xHat[1] + dt*(esoPsiSlow.xHat[2] + esoPsiSlow.l[1]*e + (esoPsiSlow.b)*(esoPsiSlow.u));
+  esoPsiSlow.xHat[2] =  esoPsiSlow.xHat[2] + dt*((esoPsiSlow.l[2])*e);
+
+}
+
+void esoThetaCalc()
+{
+  float e;
+
+  esoTheta.x = R0.thetaW.q;
+  esoTheta.u = uTheta;
+
+  if(esoTheta.first == 0){
+    esoTheta.first = 1;
+    esoTheta.xHat[0] = esoTheta.x;
+    esoTheta.xHat[1] = 0;
+    esoTheta.xHat[2] = 0;
+    esoTheta.u = 0;
+  }
+
+
+  e = esoTheta.x - esoTheta.xHat[0];
+/*
+  if (e > 0.1)
+    e = 0.1;
+  else if ( e < -0.1)
+    e = -0.1;
+*/
+
+  esoTheta.xHat[0] =  esoTheta.xHat[0] + dt*(esoTheta.xHat[1] + esoTheta.l[0]*e);
+  esoTheta.xHat[1] =  esoTheta.xHat[1] + dt*(esoTheta.xHat[2] + esoTheta.l[1]*e + (esoTheta.b)*(esoTheta.u));
+  esoTheta.xHat[2] =  esoTheta.xHat[2] + dt*((esoTheta.l[2])*e);
+
+}
+
+
+
 void balance()
 {
 
@@ -270,8 +351,12 @@ void balance()
   //R0.thetaW.dQ += (0.25*(0.5*(wheelMotor[0].dQ + wheelMotor[1].dQ) + R0.psi.dQ));
 
   esoInvCalc();
+  esoThetaCalc();
 
-  R0.psi.u = u = (R0.psi.q- -0.0)*10.0 + R0.psi.dQ*1.2 + R0.thetaW.q*0.08 + R0.thetaW.dQ*0.08 - esoPsi.xHat[2]/esoPsi.b;
+  uPsi = (R0.psi.q- -0.0)*10.0 + R0.psi.dQ*1.2*1.2;
+  uTheta = R0.thetaW.q*0.08 + R0.thetaW.dQ*0.016*1.2;
+
+  R0.psi.u = u = uPsi + uTheta - esoPsi.xHat[2]/esoPsi.b - esoTheta.xHat[2]/esoTheta.b;
   //R0.psi.u = u = (R0.psi.q- -0.0)*10.0 + R0.psi.dQ*1.2 + R0.thetaW.q*0.08 + R0.thetaW.dQ*0.05 - esoPsi.xHat[2]/esoPsi.b;
 
   uSteer = -R0.phi.q*0.1 - adaptFilterPhi(R0.phi.q)*0.08;
