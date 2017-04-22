@@ -4,7 +4,7 @@
 typedef struct control_variable{
 
   float q;
-  float dq;
+  float qD;
 
   float dQ;
   float dQD;

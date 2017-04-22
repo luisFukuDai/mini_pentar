@@ -191,13 +191,19 @@ void initInvVars()
 {
   float w0 = 40;
   float w0Slow = 1.0;
-  float w0Theta = 50;
+  float w0Theta = 60;
 
   R0.psi.dQ = 0.0;
+  R0.psi.dQD = 0.0;
   R0.psi.q  = 0.0;
+  R0.psi.qD  = 0.0;
 
   R0.thetaW.q  = 0.;
+  R0.thetaW.qD  = 0.;
   R0.thetaW.dQ = 0.0;
+  R0.thetaW.dQD = 0.0;
+
+
 
   R0.phi.q  = 0.;
   R0.phi.dQ = 0.;
@@ -221,7 +227,7 @@ void initInvVars()
   esoPsi.l[1] = w0*w0*3.0;
   esoPsi.l[2] = w0*w0*w0;
 
-  esoPsiSlow.b = -1.0;
+  esoPsiSlow.b = -0.75;
   esoPsiSlow.l[0] = w0Slow*3.0;
   esoPsiSlow.l[1] = w0Slow*w0Slow*3.0;
   esoPsiSlow.l[2] = w0Slow*w0Slow*w0Slow;
@@ -280,14 +286,16 @@ void esoPsiCalc()
 
   e = esoPsiSlow.x - esoPsiSlow.xHat[0];
 
+/*
   if (e > 1)
     e = 1;
   else if ( e < -1)
     e = -1;
+*/
 
   esoPsiSlow.xHat[0] =  esoPsiSlow.xHat[0] + dt*(esoPsiSlow.xHat[1] + esoPsiSlow.l[0]*e);
   esoPsiSlow.xHat[1] =  esoPsiSlow.xHat[1] + dt*(esoPsiSlow.xHat[2] + esoPsiSlow.l[1]*e + (esoPsiSlow.b)*(esoPsiSlow.u));
-  esoPsiSlow.xHat[2] =  esoPsiSlow.xHat[2] + dt*((esoPsiSlow.l[2])*e);
+  esoPsiSlow.xHat[2] =  esoPsiSlow.xHat[2] + dt*((esoPsiSlow.l[2])*e + 1*R0.psi.dQ);
 
 }
 
@@ -345,18 +353,28 @@ void balance()
     Z.phi.q = R0.phi.q;
     Z.phi.dQ = R0.phi.dQ;
     setInvVars();
+
+    R0.psi.qD = R0.psi.q;
+    R0.psi.dQD = R0.psi.dQ;
+
+    R0.thetaW.qD = R0.psi.q;
+    R0.thetaW.dQD = R0.psi.dQ;
+
+
   }
+
 
   R0.thetaW.dQ = adaptDqTheta = adaptFilterTheta(R0.thetaW.q);//*0.75;
   //R0.thetaW.dQ += (0.25*(0.5*(wheelMotor[0].dQ + wheelMotor[1].dQ) + R0.psi.dQ));
 
   esoInvCalc();
   esoThetaCalc();
+  esoPsiCalc();
 
-  uPsi = (R0.psi.q- -0.0)*10.0 + R0.psi.dQ*1.2*1.2;
-  uTheta = R0.thetaW.q*0.08 + R0.thetaW.dQ*0.016*1.2;
+  uPsi = (R0.psi.q - R0.psi.qD)*10.0 + (R0.psi.dQ - R0.psi.dQD)*1.2;
+  uTheta = (R0.thetaW.q - R0.thetaW.qD)*0.08 + (R0.thetaW.dQ - R0.thetaW.dQD)*0.016*1.4;
 
-  R0.psi.u = u = uPsi + uTheta - esoPsi.xHat[2]/esoPsi.b - esoTheta.xHat[2]/esoTheta.b;
+  R0.psi.u = u = uPsi + uTheta - esoPsi.xHat[2]/esoPsi.b - esoTheta.xHat[2]/esoTheta.b + esoPsiSlow.xHat[2]/esoPsiSlow.b;
   //R0.psi.u = u = (R0.psi.q- -0.0)*10.0 + R0.psi.dQ*1.2 + R0.thetaW.q*0.08 + R0.thetaW.dQ*0.05 - esoPsi.xHat[2]/esoPsi.b;
 
   uSteer = -R0.phi.q*0.1 - adaptFilterPhi(R0.phi.q)*0.08;
