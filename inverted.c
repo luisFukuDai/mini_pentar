@@ -340,6 +340,7 @@ void balance()
 
   static int first;
 
+  static float t;
 
 
   if (first == 0) {
@@ -361,6 +362,7 @@ void balance()
     R0.thetaW.dQD = R0.psi.dQ;
 
 
+
   }
 
 
@@ -370,6 +372,11 @@ void balance()
   esoInvCalc();
   esoThetaCalc();
   esoPsiCalc();
+
+  if ( t > 20.0 && t < 22.5 ){
+    R0.thetaW.qD -= (2.0*M_PI/5000.0);
+  }
+
 
   uPsi = (R0.psi.q - R0.psi.qD)*10.0 + (R0.psi.dQ - R0.psi.dQD)*1.2;
   uTheta = (R0.thetaW.q - R0.thetaW.qD)*0.08 + (R0.thetaW.dQ - R0.thetaW.dQD)*0.016*1.4;
@@ -389,4 +396,6 @@ void balance()
 //  setMotorPwmValue(3,wheelMotor[3].pwmVal);
 
   R0.psi.u = tau;
+
+  t += 0.001;
 }
