@@ -24,8 +24,8 @@ typedef struct motorState{
 
   float KT;
 
-  unsigned short timeOld;
-  short qOld;
+  int timeOld;
+  int qOld;
 
   short encPolarity;
   short pwmPolarity;

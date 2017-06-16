@@ -218,10 +218,10 @@ void esoCalc(short n)
 
 void getMotorState(short n)
 {
-  unsigned short timeNow;
-  short cetDelta;
-  short qNow;
-  short qDelta;
+  int timeNow;
+  int cetDelta;
+  int qNow;
+  int qDelta;
 
   qNow = getEncCnt(wheelMotor[n].encOffset);
   qDelta = qNow - wheelMotor[n].qOld;
